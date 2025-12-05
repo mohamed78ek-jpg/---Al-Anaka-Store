@@ -5,10 +5,13 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   // Setting base to './' ensures that generated asset links are relative.
-  // This makes the app compatible with all hosting environments, including 
-  // those that serve the app from a subdirectory (like GitHub Pages).
   base: './',
   build: {
     outDir: 'dist',
+    emptyOutDir: true,
+  },
+  // Define process.env to prevent crashes in libraries that expect a Node.js environment
+  define: {
+    'process.env': {}
   }
 });
