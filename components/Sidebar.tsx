@@ -126,7 +126,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Footer */}
         <div className="p-6 bg-gray-50 border-t border-gray-100 text-center">
           <p className="text-xs text-gray-400">
-            © 2024 {language === 'ar' ? 'متجر الأناقة' : 'Al-Anaka Store'}
+            © 2024 {language === 'ar' ? 'بازار لوك' : 'Bazzr lok'}
           </p>
         </div>
       </div>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Eye, EyeOff, Plus, Trash2, LogOut, Package, ShieldCheck, ChevronDown, Megaphone, ShoppingBag, Phone, MapPin, Mail, User, FileText, X, Download, List, PlusCircle, Image as ImageIcon, Upload, MonitorPlay, Banknote } from 'lucide-react';
 import { Product, Language, Order, PromoConfig, PopupConfig } from '../types';
@@ -699,14 +698,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                              <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-xl print:text-black print:bg-transparent print:border print:border-black">
-                                {language === 'ar' ? 'أ' : 'A'}
+                                {language === 'ar' ? 'ب' : 'B'}
                              </div>
-                             <h1 className="text-3xl font-black text-gray-900 tracking-tight">{language === 'ar' ? 'متجر الأناقة' : 'Al-Anaka Store'}</h1>
+                             <h1 className="text-3xl font-black text-gray-900 tracking-tight">{language === 'ar' ? 'بازار لوك' : 'Bazzr lok'}</h1>
                         </div>
                         <p className="text-gray-500 text-sm max-w-xs leading-relaxed">
                             {language === 'ar' ? 'أزياء عصرية تجمع بين الفخامة والراحة.' : 'Modern fashion combining luxury and comfort.'}<br/>
                             Riyadh, Saudi Arabia<br/>
-                            contact@alanaka.com | +966 50 000 0000
+                            contact@bazzrlok.com | +966 50 000 0000
                         </p>
                     </div>
                     <div className="text-right w-full md:w-auto">

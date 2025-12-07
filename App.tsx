@@ -20,7 +20,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [language, setLanguage] = useState<Language>('ar');
   const [products, setProducts] = useState<Product[]>(PRODUCTS);
-  const [bannerText, setBannerText] = useState('أهلاً بكم في متجر الأناقة - خصومات تصل إلى 50% على التشكيلة الجديدة! 🌟 شحن مجاني للطلبات فوق 300 د.م');
+  const [bannerText, setBannerText] = useState('أهلاً بكم في بازار لوك - خصومات تصل إلى 50% على التشكيلة الجديدة! 🌟 شحن مجاني للطلبات فوق 300 د.م');
   const [promoConfig, setPromoConfig] = useState<PromoConfig>({ isActive: false, image: '' });
   const [popupConfig, setPopupConfig] = useState<PopupConfig>({ isActive: false, image: '' });
   const [showAdPopup, setShowAdPopup] = useState(false);
@@ -352,7 +352,7 @@ function App() {
           
           <div className="border-t border-gray-100 pt-8 text-center">
             <p className="text-gray-400 text-sm">
-              © 2024 {t('متجر الأناقة. جميع الحقوق محفوظة.', 'Al-Anaka Store. All rights reserved.')}
+              © 2024 {t('بازار لوك. جميع الحقوق محفوظة.', 'Bazzr lok. All rights reserved.')}
             </p>
           </div>
         </div>

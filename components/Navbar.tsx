@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ShoppingBag, Menu, Search } from 'lucide-react';
 import { ViewState, Language } from '../types';
@@ -30,10 +29,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center cursor-pointer group" onClick={() => onChangeView(ViewState.HOME)}>
             <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold ms-2 group-hover:scale-110 transition-transform">
-              {language === 'ar' ? 'أ' : 'A'}
+              {language === 'ar' ? 'ب' : 'B'}
             </div>
             <span className="font-bold text-xl text-gray-900 hidden sm:block">
-              {language === 'ar' ? 'الأناقة' : 'Al-Anaka'}
+              {language === 'ar' ? 'بازار لوك' : 'Bazzr lok'}
             </span>
           </div>
 
