@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, LogOut, Package, ShieldCheck, ChevronDown, Megaphone, ShoppingBag, Phone, MapPin, Mail, User, FileText, X, List, PlusCircle, Image as ImageIcon, MonitorPlay, Settings, Edit, Printer } from 'lucide-react';
+import { Plus, Trash2, LogOut, Package, ShieldCheck, ChevronDown, Megaphone, ShoppingBag, Phone, MapPin, Mail, User, FileText, X, List, PlusCircle, Image as ImageIcon, MonitorPlay, Settings, Edit, Printer, Upload } from 'lucide-react';
 import { Product, Language, Order, PopupConfig, SiteConfig, OrderStatus } from '../types';
 import { APP_CURRENCY } from '../constants';
 
@@ -133,6 +133,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       const reader = new FileReader();
       reader.onloadend = () => {
         onUpdatePopupConfig({ ...popupConfig, image: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handler for Product Image Upload
+  const handleProductImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewProduct({ ...newProduct, image: reader.result as string });
       };
       reader.readAsDataURL(file);
     }
@@ -761,15 +773,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">{t('رابط الصورة', 'Image URL')}</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">{t('صورة المنتج', 'Product Image')}</label>
+              
+              {/* File Upload Area */}
+              <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-emerald-500 hover:bg-emerald-50 transition-colors cursor-pointer relative bg-white mb-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProductImageUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <Upload className="mx-auto text-gray-400 mb-2" size={32} />
+                <span className="text-sm text-gray-500 font-medium">
+                  {t('اضغط لتحميل صورة من الجهاز', 'Click to upload image from device')}
+                </span>
+              </div>
+
+              {/* URL Input (Fallback) */}
               <div className="flex gap-2">
                 <input
                   type="url"
-                  required
                   value={newProduct.image}
                   onChange={e => setNewProduct({...newProduct, image: e.target.value})}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
-                  placeholder="https://..."
+                  placeholder={t('أو ضع رابط الصورة هنا...', 'Or paste image URL here...')}
                 />
                 {newProduct.image && (
                   <div className="w-10 h-10 rounded border border-gray-200 overflow-hidden bg-gray-50 flex-shrink-0">
