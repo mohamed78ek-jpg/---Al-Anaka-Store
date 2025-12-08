@@ -9,7 +9,7 @@ import { AIStylist } from './components/AIStylist';
 import { TrackOrder } from './components/TrackOrder';
 import { ReportProblem } from './components/ReportProblem';
 import { PRODUCTS } from './constants';
-import { Product, CartItem, ViewState, Language, Order, PopupConfig } from './types';
+import { Product, CartItem, ViewState, Language, Order, PopupConfig, SiteConfig, OrderStatus } from './types';
 import { Search, Mail, Banknote } from 'lucide-react';
 
 function App() {
@@ -24,6 +24,7 @@ function App() {
   const [products, setProducts] = useState<Product[]>(PRODUCTS);
   const [bannerText, setBannerText] = useState('أهلاً بكم في بازار لوك - خصومات تصل إلى 50% على التشكيلة الجديدة! 🌟 شحن مجاني للطلبات فوق 300 د.م');
   const [popupConfig, setPopupConfig] = useState<PopupConfig>({ isActive: false, image: '' });
+  const [siteConfig, setSiteConfig] = useState<SiteConfig>({ enableTrackOrder: true });
   const [showAdPopup, setShowAdPopup] = useState(false);
 
   // Handle Direction and Language
@@ -153,6 +154,13 @@ function App() {
     }
   };
 
+  const handleUpdateOrderStatus = (orderId: string, newStatus: OrderStatus) => {
+    setOrders(prev => prev.map(order => 
+      order.id === orderId ? { ...order, status: newStatus } : order
+    ));
+    showNotification(t('تم تحديث حالة الطلب', 'Order status updated'));
+  };
+
   const renderContent = () => {
     switch (currentView) {
       case ViewState.ADMIN:
@@ -167,6 +175,9 @@ function App() {
             onUpdateBannerText={setBannerText}
             popupConfig={popupConfig}
             onUpdatePopupConfig={setPopupConfig}
+            siteConfig={siteConfig}
+            onUpdateSiteConfig={setSiteConfig}
+            onUpdateOrderStatus={handleUpdateOrderStatus}
           />
         );
       case ViewState.CART:
@@ -287,6 +298,7 @@ function App() {
         onChangeView={setCurrentView}
         language={language}
         onLanguageChange={setLanguage}
+        siteConfig={siteConfig}
       />
 
       {/* Ad Popup */}

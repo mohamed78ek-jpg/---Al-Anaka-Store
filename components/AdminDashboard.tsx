@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, LogOut, Package, ShieldCheck, ChevronDown, Megaphone, ShoppingBag, Phone, MapPin, Mail, User, FileText, X, List, PlusCircle, Image as ImageIcon, MonitorPlay, Settings } from 'lucide-react';
-import { Product, Language, Order, PopupConfig } from '../types';
+import { Plus, Trash2, LogOut, Package, ShieldCheck, ChevronDown, Megaphone, ShoppingBag, Phone, MapPin, Mail, User, FileText, X, List, PlusCircle, Image as ImageIcon, MonitorPlay, Settings, Edit, Printer } from 'lucide-react';
+import { Product, Language, Order, PopupConfig, SiteConfig, OrderStatus } from '../types';
 import { APP_CURRENCY } from '../constants';
 
 interface AdminDashboardProps {
@@ -13,6 +13,9 @@ interface AdminDashboardProps {
   onUpdateBannerText: (text: string) => void;
   popupConfig: PopupConfig;
   onUpdatePopupConfig: (config: PopupConfig) => void;
+  siteConfig: SiteConfig;
+  onUpdateSiteConfig: (config: SiteConfig) => void;
+  onUpdateOrderStatus: (orderId: string, newStatus: OrderStatus) => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ 
@@ -24,7 +27,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   bannerText,
   onUpdateBannerText,
   popupConfig,
-  onUpdatePopupConfig
+  onUpdatePopupConfig,
+  siteConfig,
+  onUpdateSiteConfig,
+  onUpdateOrderStatus
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
@@ -34,6 +40,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [error, setError] = useState('');
   
   const [activeTab, setActiveTab] = useState<'orders' | 'add_product' | 'product_list' | 'banner' | 'popup' | 'settings'>('orders');
+  
+  // State for Order Management Modal
+  const [selectedOrderForEdit, setSelectedOrderForEdit] = useState<Order | null>(null);
 
   // Form State
   const [newProduct, setNewProduct] = useState<Partial<Product> & { sizesString: string }>({
@@ -50,6 +59,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Predefined Categories
   const CATEGORIES = ['رجال', 'أطفال', 'أحذية', 'اكسسوارات'];
+
+  const getStatusLabel = (status: OrderStatus) => {
+    switch (status) {
+      case 'pending': return t('قيد الانتظار', 'Pending');
+      case 'processing': return t('جاري التجهيز', 'Processing');
+      case 'shipped': return t('تم الشحن', 'Shipped');
+      case 'delivered': return t('تم التوصيل', 'Delivered');
+      case 'cancelled': return t('ملغي', 'Cancelled');
+      default: return status;
+    }
+  };
+
+  const getStatusColor = (status: OrderStatus) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'processing': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'shipped': return 'bg-indigo-100 text-indigo-700 border-indigo-200';
+      case 'delivered': return 'bg-green-100 text-green-700 border-green-200';
+      case 'cancelled': return 'bg-red-100 text-red-700 border-red-200';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,6 +135,46 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         onUpdatePopupConfig({ ...popupConfig, image: reader.result as string });
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePrintOrder = (order: Order) => {
+    const printContent = `
+      <div style="direction: ${language === 'ar' ? 'rtl' : 'ltr'}; font-family: sans-serif; padding: 20px;">
+        <h1 style="text-align: center; margin-bottom: 20px;">${t('فاتورة طلب', 'Order Receipt')} #${order.id}</h1>
+        <div style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+          <p><strong>${t('الاسم:', 'Name:')}</strong> ${order.customerName}</p>
+          <p><strong>${t('الهاتف:', 'Phone:')}</strong> ${order.phoneNumber}</p>
+          <p><strong>${t('العنوان:', 'Address:')}</strong> ${order.address}</p>
+          <p><strong>${t('التاريخ:', 'Date:')}</strong> ${new Date(order.date).toLocaleString()}</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+          <thead>
+            <tr style="background-color: #f0f0f0;">
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: start;">${t('المنتج', 'Item')}</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t('الكمية', 'Qty')}</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: end;">${t('السعر', 'Price')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${order.items.map(item => `
+              <tr>
+                <td style="border: 1px solid #ddd; padding: 8px;">${item.name} ${item.selectedSize ? `(${item.selectedSize})` : ''}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.quantity}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: end;">${(item.price * item.quantity).toFixed(2)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <h3 style="text-align: end;">${t('الإجمالي:', 'Total:')} ${order.totalAmount.toFixed(2)} ${APP_CURRENCY}</h3>
+      </div>
+    `;
+    
+    const printWindow = window.open('', '', 'width=600,height=600');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.print();
     }
   };
 
@@ -270,20 +341,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             ) : (
               <div className="space-y-4">
                 {orders.map((order) => (
-                  <div key={order.id} className="border border-gray-200 rounded-xl p-4 hover:border-emerald-500 transition-colors">
+                  <div key={order.id} className="border border-gray-200 rounded-xl p-4 hover:border-emerald-500 transition-colors relative">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 pb-4 border-b border-gray-100">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-bold text-lg text-gray-900">#{order.id}</span>
-                          <span className={`px-2 py-0.5 rounded text-xs font-bold ${order.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                            {order.status === 'completed' ? t('مكتمل', 'Completed') : t('قيد الانتظار', 'Pending')}
+                          <span className={`px-2 py-0.5 rounded text-xs font-bold border ${getStatusColor(order.status)}`}>
+                            {getStatusLabel(order.status)}
                           </span>
                         </div>
                         <p className="text-sm text-gray-500">{new Date(order.date).toLocaleString()}</p>
                       </div>
-                      <div className="text-left md:text-right">
+                      
+                      <div className="flex flex-col items-end gap-2">
                         <div className="font-bold text-xl text-emerald-600">{order.totalAmount.toFixed(2)} {APP_CURRENCY}</div>
-                        <div className="text-sm text-gray-500">{order.items.length} {t('منتجات', 'Items')}</div>
+                        
+                        <button 
+                          onClick={() => setSelectedOrderForEdit(order)}
+                          className="flex items-center gap-1 text-sm bg-gray-900 text-white px-3 py-1.5 rounded-lg hover:bg-emerald-600 transition-colors shadow-sm"
+                        >
+                          <Edit size={14} />
+                          {t('إدارة الطلب', 'Manage Order')}
+                        </button>
                       </div>
                     </div>
                     
@@ -576,6 +655,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               {t('الإعدادات العامة', 'General Settings')}
             </h2>
 
+            {/* Site Settings */}
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+              <h3 className="font-bold text-lg mb-4 text-gray-800">{t('إعدادات الموقع', 'Site Settings')}</h3>
+              
+              <div className="flex items-center justify-between p-2">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${siteConfig.enableTrackOrder ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-200 text-gray-500'}`}>
+                    <Package size={20} />
+                  </div>
+                  <span className="font-bold text-gray-700">{t('تفعيل تتبع الطلبات', 'Enable Order Tracking')}</span>
+                </div>
+                
+                <button
+                  onClick={() => onUpdateSiteConfig({ ...siteConfig, enableTrackOrder: !siteConfig.enableTrackOrder })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    siteConfig.enableTrackOrder ? 'bg-emerald-600' : 'bg-gray-300'
+                  }`}
+                  dir="ltr"
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      siteConfig.enableTrackOrder ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
             {/* Password Change */}
             <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
               <h3 className="font-bold text-lg mb-4 text-gray-800">{t('تغيير كلمة المرور', 'Change Password')}</h3>
@@ -603,6 +710,69 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         )}
 
       </div>
+
+      {/* Order Status Modal */}
+      {selectedOrderForEdit && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setSelectedOrderForEdit(null)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in slide-in-from-bottom-10 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 bg-gray-900 text-white flex justify-between items-center">
+              <div>
+                <h3 className="font-bold text-lg">{t('حالة الطلب', 'Order Status')}</h3>
+                <p className="text-xs text-gray-400">#{selectedOrderForEdit.id}</p>
+              </div>
+              <button onClick={() => setSelectedOrderForEdit(null)} className="text-gray-400 hover:text-white">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-2">
+              {(['pending', 'processing', 'shipped', 'delivered', 'cancelled'] as OrderStatus[]).map((status) => (
+                <button
+                  key={status}
+                  onClick={() => {
+                    onUpdateOrderStatus(selectedOrderForEdit.id, status);
+                    setSelectedOrderForEdit(prev => prev ? { ...prev, status } : null);
+                  }}
+                  className={`w-full flex items-center justify-between p-4 mb-1 rounded-xl transition-all ${
+                    selectedOrderForEdit.status === status 
+                      ? 'bg-gray-100 font-bold border-2 border-emerald-500 text-emerald-800' 
+                      : 'hover:bg-gray-50 border-2 border-transparent text-gray-600'
+                  }`}
+                >
+                  <span>{getStatusLabel(status)}</span>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    selectedOrderForEdit.status === status ? 'border-emerald-500' : 'border-gray-300'
+                  }`}>
+                    {selectedOrderForEdit.status === status && (
+                      <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full" />
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <div className="p-4 border-t border-gray-100 bg-gray-50">
+               <button 
+                 onClick={() => handlePrintOrder(selectedOrderForEdit)}
+                 className="w-full bg-gray-900 hover:bg-emerald-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"
+               >
+                 <Printer size={18} />
+                 <span>{t('طباعة / حفظ', 'Print / Save')}</span>
+               </button>
+               <div className="text-center mt-3 text-xs text-gray-400 flex items-center justify-center gap-1">
+                 <Package size={12} />
+                 <span>{t('عدد المنتجات:', 'Items Count:')} {selectedOrderForEdit.items.length}</span>
+               </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

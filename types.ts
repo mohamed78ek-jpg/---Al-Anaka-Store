@@ -15,6 +15,8 @@ export interface CartItem extends Product {
   cartId: string; // Unique ID combination of productId + size
 }
 
+export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+
 export interface Order {
   id: string;
   customerName: string;
@@ -24,7 +26,7 @@ export interface Order {
   items: CartItem[];
   totalAmount: number;
   date: string;
-  status: 'pending' | 'completed';
+  status: OrderStatus;
   receiptFile?: string; // Base64 string for the uploaded file
 }
 
@@ -48,4 +50,8 @@ export type Language = 'ar' | 'en';
 export interface PopupConfig {
   isActive: boolean;
   image: string; // URL or Base64
+}
+
+export interface SiteConfig {
+  enableTrackOrder: boolean;
 }

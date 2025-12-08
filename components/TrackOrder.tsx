@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Search, Package, ArrowRight, CheckCircle, Clock } from 'lucide-react';
-import { Order, Language } from '../types';
+import { Search, Package, ArrowRight, CheckCircle, Clock, Loader, Truck, XCircle } from 'lucide-react';
+import { Order, Language, OrderStatus } from '../types';
 import { APP_CURRENCY } from '../constants';
 
 interface TrackOrderProps {
@@ -21,6 +21,47 @@ export const TrackOrder: React.FC<TrackOrderProps> = ({ orders, onBack, language
     const order = orders.find(o => o.id === orderId.trim());
     setFoundOrder(order || null);
     setHasSearched(true);
+  };
+
+  const getStatusInfo = (status: OrderStatus) => {
+    switch (status) {
+      case 'pending': 
+        return { 
+          label: t('قيد الانتظار', 'Pending'), 
+          color: 'bg-yellow-100 text-yellow-700', 
+          icon: <Clock size={16} /> 
+        };
+      case 'processing': 
+        return { 
+          label: t('جاري التجهيز', 'Processing'), 
+          color: 'bg-blue-100 text-blue-700', 
+          icon: <Loader size={16} className="animate-spin" /> 
+        };
+      case 'shipped': 
+        return { 
+          label: t('تم الشحن', 'Shipped'), 
+          color: 'bg-indigo-100 text-indigo-700', 
+          icon: <Truck size={16} /> 
+        };
+      case 'delivered': 
+        return { 
+          label: t('تم التوصيل', 'Delivered'), 
+          color: 'bg-green-100 text-green-700', 
+          icon: <CheckCircle size={16} /> 
+        };
+      case 'cancelled': 
+        return { 
+          label: t('ملغي', 'Cancelled'), 
+          color: 'bg-red-100 text-red-700', 
+          icon: <XCircle size={16} /> 
+        };
+      default: 
+        return { 
+          label: status, 
+          color: 'bg-gray-100 text-gray-700', 
+          icon: <Package size={16} /> 
+        };
+    }
   };
 
   return (
@@ -71,17 +112,16 @@ export const TrackOrder: React.FC<TrackOrderProps> = ({ orders, onBack, language
               <h3 className="font-bold text-lg text-gray-900 mb-1">{t('تفاصيل الطلب', 'Order Details')} #{foundOrder.id}</h3>
               <p className="text-sm text-gray-500">{new Date(foundOrder.date).toLocaleDateString()} {new Date(foundOrder.date).toLocaleTimeString()}</p>
             </div>
-            <div className={`px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 ${
-              foundOrder.status === 'completed' 
-                ? 'bg-green-100 text-green-700' 
-                : 'bg-yellow-100 text-yellow-700'
-            }`}>
-              {foundOrder.status === 'completed' ? (
-                <><CheckCircle size={16} /> {t('مكتمل', 'Completed')}</>
-              ) : (
-                <><Clock size={16} /> {t('قيد المراجعة', 'Pending')}</>
-              )}
-            </div>
+            
+            {(() => {
+              const info = getStatusInfo(foundOrder.status);
+              return (
+                <div className={`px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 ${info.color}`}>
+                  {info.icon}
+                  {info.label}
+                </div>
+              );
+            })()}
           </div>
 
           <div className="space-y-4 mb-6">
