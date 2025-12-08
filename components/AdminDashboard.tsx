@@ -139,42 +139,333 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handlePrintOrder = (order: Order) => {
+    // Generate QR Code URL using a public API
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`Order #${order.id} - ${order.customerName} - ${order.totalAmount} ${APP_CURRENCY}`)}`;
+
     const printContent = `
-      <div style="direction: ${language === 'ar' ? 'rtl' : 'ltr'}; font-family: sans-serif; padding: 20px;">
-        <h1 style="text-align: center; margin-bottom: 20px;">${t('فاتورة طلب', 'Order Receipt')} #${order.id}</h1>
-        <div style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
-          <p><strong>${t('الاسم:', 'Name:')}</strong> ${order.customerName}</p>
-          <p><strong>${t('الهاتف:', 'Phone:')}</strong> ${order.phoneNumber}</p>
-          <p><strong>${t('العنوان:', 'Address:')}</strong> ${order.address}</p>
-          <p><strong>${t('التاريخ:', 'Date:')}</strong> ${new Date(order.date).toLocaleString()}</p>
-        </div>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-          <thead>
-            <tr style="background-color: #f0f0f0;">
-              <th style="border: 1px solid #ddd; padding: 8px; text-align: start;">${t('المنتج', 'Item')}</th>
-              <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">${t('الكمية', 'Qty')}</th>
-              <th style="border: 1px solid #ddd; padding: 8px; text-align: end;">${t('السعر', 'Price')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${order.items.map(item => `
+      <!DOCTYPE html>
+      <html lang="${language}" dir="${language === 'ar' ? 'rtl' : 'ltr'}">
+      <head>
+        <meta charset="UTF-8">
+        <title>Invoice #${order.id}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+        <style>
+          body {
+            font-family: 'Tajawal', sans-serif;
+            background: #fff;
+            color: #333;
+            margin: 0;
+            padding: 40px;
+            font-size: 14px;
+          }
+          .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #eee;
+            padding: 40px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #10b981;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .brand-section h1 {
+            margin: 0;
+            color: #10b981;
+            font-size: 32px;
+            font-weight: 800;
+          }
+          .brand-section p {
+            margin: 5px 0 0;
+            color: #666;
+            font-size: 14px;
+          }
+          .invoice-info {
+            text-align: ${language === 'ar' ? 'left' : 'right'};
+          }
+          .invoice-info h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+            text-transform: uppercase;
+          }
+          .invoice-info p {
+            margin: 5px 0 0;
+            color: #666;
+          }
+          
+          .details-grid {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 40px;
+          }
+          .details-column {
+            flex: 1;
+          }
+          .details-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #10b981;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+          }
+          .info-row {
+            display: flex;
+            margin-bottom: 8px;
+          }
+          .info-label {
+            font-weight: bold;
+            width: 100px;
+            color: #555;
+          }
+          .info-value {
+            flex: 1;
+            color: #333;
+          }
+          
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+          }
+          th {
+            background-color: #f8fafc;
+            color: #1f2937;
+            font-weight: bold;
+            padding: 12px;
+            text-align: ${language === 'ar' ? 'right' : 'left'};
+            border-bottom: 2px solid #e5e7eb;
+          }
+          td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: middle;
+          }
+          .product-img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #eee;
+          }
+          .total-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 40px;
+          }
+          .total-box {
+            width: 300px;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+          }
+          .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: #555;
+          }
+          .grand-total {
+            border-top: 2px solid #10b981;
+            padding-top: 10px;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #10b981;
+          }
+          
+          .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 40px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+          }
+          .qr-code img {
+            width: 100px;
+            height: 100px;
+          }
+          .thank-you {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+          }
+          .contact-info {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 15px;
+          }
+          
+          /* Payment Methods */
+          .payment-methods {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+          }
+          .payment-badge {
+            border: 1px solid #e5e7eb;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 11px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          @media print {
+            body { padding: 0; }
+            .invoice-container { box-shadow: none; border: none; padding: 20px; }
+            button { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-container">
+          <!-- Header -->
+          <div class="header">
+            <div class="brand-section">
+              <h1>${language === 'ar' ? 'بازار لوك' : 'Bazzr lok'}</h1>
+              <p>${language === 'ar' ? 'متجر الملابس العصري' : 'Modern Fashion Store'}</p>
+            </div>
+            <div class="invoice-info">
+              <h2>${language === 'ar' ? 'فاتورة' : 'INVOICE'}</h2>
+              <p>#${order.id}</p>
+              <p>${new Date(order.date).toLocaleString()}</p>
+            </div>
+          </div>
+
+          <!-- Info Grid -->
+          <div class="details-grid">
+            <div class="details-column">
+              <div class="details-title">${language === 'ar' ? 'بيانات العميل' : 'Bill To'}</div>
+              <div class="info-row">
+                <span class="info-label">${language === 'ar' ? 'الاسم:' : 'Name:'}</span>
+                <span class="info-value">${order.customerName}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">${language === 'ar' ? 'الهاتف:' : 'Phone:'}</span>
+                <span class="info-value" dir="ltr">${order.phoneNumber}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">${language === 'ar' ? 'البريد:' : 'Email:'}</span>
+                <span class="info-value">${order.email}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">${language === 'ar' ? 'العنوان:' : 'Address:'}</span>
+                <span class="info-value">${order.address}</span>
+              </div>
+            </div>
+            
+            <div class="details-column">
+               <div class="details-title">${language === 'ar' ? 'تفاصيل الطلب' : 'Order Info'}</div>
+               <div class="info-row">
+                <span class="info-label">${language === 'ar' ? 'الحالة:' : 'Status:'}</span>
+                <span class="info-value">${getStatusLabel(order.status)}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">${language === 'ar' ? 'طريقة الدفع:' : 'Payment:'}</span>
+                <span class="info-value">${language === 'ar' ? 'عند الاستلام' : 'Cash on Delivery'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Products Table -->
+          <table>
+            <thead>
               <tr>
-                <td style="border: 1px solid #ddd; padding: 8px;">${item.name} ${item.selectedSize ? `(${item.selectedSize})` : ''}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.quantity}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: end;">${(item.price * item.quantity).toFixed(2)}</td>
+                <th>${language === 'ar' ? 'المنتج' : 'Item'}</th>
+                <th>${language === 'ar' ? 'التفاصيل' : 'Details'}</th>
+                <th style="text-align: center;">${language === 'ar' ? 'الكمية' : 'Qty'}</th>
+                <th style="text-align: right;">${language === 'ar' ? 'السعر' : 'Price'}</th>
+                <th style="text-align: right;">${language === 'ar' ? 'الإجمالي' : 'Total'}</th>
               </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <h3 style="text-align: end;">${t('الإجمالي:', 'Total:')} ${order.totalAmount.toFixed(2)} ${APP_CURRENCY}</h3>
-      </div>
+            </thead>
+            <tbody>
+              ${order.items.map(item => `
+                <tr>
+                  <td width="60">
+                    <img src="${item.image}" alt="Product" class="product-img">
+                  </td>
+                  <td>
+                    <div style="font-weight: bold;">${item.name}</div>
+                    <div style="font-size: 12px; color: #666;">
+                      ${item.category} ${item.selectedSize ? `| ${language === 'ar' ? 'المقاس' : 'Size'}: ${item.selectedSize}` : ''}
+                    </div>
+                  </td>
+                  <td style="text-align: center;">${item.quantity}</td>
+                  <td style="text-align: right;">${item.price.toFixed(2)}</td>
+                  <td style="text-align: right; font-weight: bold;">${(item.price * item.quantity).toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <!-- Totals -->
+          <div class="total-section">
+            <div class="total-box">
+              <div class="total-row">
+                <span>${language === 'ar' ? 'المجموع الفرعي' : 'Subtotal'}</span>
+                <span>${(order.totalAmount / 1.15).toFixed(2)} ${APP_CURRENCY}</span>
+              </div>
+              <div class="total-row">
+                <span>${language === 'ar' ? 'الضريبة (15%)' : 'Tax (15%)'}</span>
+                <span>${(order.totalAmount - (order.totalAmount / 1.15)).toFixed(2)} ${APP_CURRENCY}</span>
+              </div>
+              <div class="total-row grand-total">
+                <span>${language === 'ar' ? 'الإجمالي النهائي' : 'Grand Total'}</span>
+                <span>${order.totalAmount.toFixed(2)} ${APP_CURRENCY}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="footer">
+            <div>
+              <div class="thank-you">${language === 'ar' ? 'شكراً لتسوقك معنا!' : 'Thank you for your business!'}</div>
+              <div class="contact-info">
+                Bazzr lok Inc. | mohamedrbani9@gmail.com<br>
+                ${language === 'ar' ? 'تم إنشاء الفاتورة إلكترونياً' : 'System Generated Invoice'}
+              </div>
+
+              <!-- Payment Methods -->
+              <div class="payment-methods">
+                <div class="payment-badge" style="color: #1a1f71; font-style: italic;">VISA</div>
+                <div class="payment-badge" style="color: #eb001b;">Mastercard</div>
+                <div class="payment-badge" style="color: #005eb8;">mada</div>
+                <div class="payment-badge" style="color: #000;"> Pay</div>
+                <div class="payment-badge" style="background-color: #ecfdf5; color: #047857; border-color: #d1fae5;">
+                  ${language === 'ar' ? 'عند الاستلام' : 'Cash on Delivery'}
+                </div>
+              </div>
+            </div>
+            
+            <div class="qr-code">
+              <img src="${qrCodeUrl}" alt="QR Code">
+              <div style="font-size: 10px; text-align: center; margin-top: 5px;">Scan to Verify</div>
+            </div>
+          </div>
+        </div>
+        <script>
+          window.onload = function() { window.print(); }
+        </script>
+      </body>
+      </html>
     `;
     
-    const printWindow = window.open('', '', 'width=600,height=600');
+    const printWindow = window.open('', '', 'width=900,height=800');
     if (printWindow) {
       printWindow.document.write(printContent);
       printWindow.document.close();
-      printWindow.print();
     }
   };
 
