@@ -6,6 +6,7 @@ import { Sidebar } from './components/Sidebar';
 import { AdminDashboard } from './components/AdminDashboard';
 import { PromoCard } from './components/PromoCard';
 import { AdPopup } from './components/AdPopup';
+import { AIStylist } from './components/AIStylist';
 import { PRODUCTS } from './constants';
 import { Product, CartItem, ViewState, Language, Order, PromoConfig, PopupConfig } from './types';
 import { Search, Mail, Banknote } from 'lucide-react';
@@ -287,6 +288,9 @@ function App() {
         onClose={() => setShowAdPopup(false)} 
         image={popupConfig.image} 
       />
+      
+      {/* AI Stylist */}
+      <AIStylist products={products} language={language} />
       
       <main className="transition-all duration-500 ease-in-out flex-grow pb-12">
         {renderContent()}
