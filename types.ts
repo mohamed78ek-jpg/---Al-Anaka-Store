@@ -38,15 +38,12 @@ export enum ViewState {
   HOME = 'HOME',
   CART = 'CART',
   PRODUCT_DETAILS = 'PRODUCT_DETAILS',
-  ADMIN = 'ADMIN'
+  ADMIN = 'ADMIN',
+  TRACK_ORDER = 'TRACK_ORDER',
+  REPORT_PROBLEM = 'REPORT_PROBLEM'
 }
 
 export type Language = 'ar' | 'en';
-
-export interface PromoConfig {
-  isActive: boolean;
-  image: string; // URL or Base64
-}
 
 export interface PopupConfig {
   isActive: boolean;

@@ -4,11 +4,12 @@ import { ProductCard } from './components/ProductCard';
 import { Cart } from './components/Cart';
 import { Sidebar } from './components/Sidebar';
 import { AdminDashboard } from './components/AdminDashboard';
-import { PromoCard } from './components/PromoCard';
 import { AdPopup } from './components/AdPopup';
 import { AIStylist } from './components/AIStylist';
+import { TrackOrder } from './components/TrackOrder';
+import { ReportProblem } from './components/ReportProblem';
 import { PRODUCTS } from './constants';
-import { Product, CartItem, ViewState, Language, Order, PromoConfig, PopupConfig } from './types';
+import { Product, CartItem, ViewState, Language, Order, PopupConfig } from './types';
 import { Search, Mail, Banknote } from 'lucide-react';
 
 function App() {
@@ -22,7 +23,6 @@ function App() {
   const [language, setLanguage] = useState<Language>('ar');
   const [products, setProducts] = useState<Product[]>(PRODUCTS);
   const [bannerText, setBannerText] = useState('أهلاً بكم في بازار لوك - خصومات تصل إلى 50% على التشكيلة الجديدة! 🌟 شحن مجاني للطلبات فوق 300 د.م');
-  const [promoConfig, setPromoConfig] = useState<PromoConfig>({ isActive: false, image: '' });
   const [popupConfig, setPopupConfig] = useState<PopupConfig>({ isActive: false, image: '' });
   const [showAdPopup, setShowAdPopup] = useState(false);
 
@@ -165,8 +165,6 @@ function App() {
             language={language}
             bannerText={bannerText}
             onUpdateBannerText={setBannerText}
-            promoConfig={promoConfig}
-            onUpdatePromoConfig={setPromoConfig}
             popupConfig={popupConfig}
             onUpdatePopupConfig={setPopupConfig}
           />
@@ -179,6 +177,21 @@ function App() {
             onUpdateQuantity={handleUpdateQuantity}
             onBack={() => setCurrentView(ViewState.HOME)}
             onPlaceOrder={handlePlaceOrder}
+            language={language}
+          />
+        );
+      case ViewState.TRACK_ORDER:
+        return (
+          <TrackOrder 
+            orders={orders}
+            onBack={() => setCurrentView(ViewState.HOME)}
+            language={language}
+          />
+        );
+      case ViewState.REPORT_PROBLEM:
+        return (
+          <ReportProblem 
+            onBack={() => setCurrentView(ViewState.HOME)}
             language={language}
           />
         );
@@ -214,13 +227,7 @@ function App() {
 
             {/* Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Promo Card Slot - Placed first if active */}
-              {promoConfig.isActive && promoConfig.image && (
-                 <div className="col-span-1">
-                   <PromoCard image={promoConfig.image} />
-                 </div>
-              )}
-
+              
               {filteredProducts.map(product => (
                 <ProductCard 
                   key={product.id} 
@@ -229,7 +236,7 @@ function App() {
                 />
               ))}
               
-              {filteredProducts.length === 0 && !promoConfig.isActive && (
+              {filteredProducts.length === 0 && (
                 <div className="col-span-full text-center py-12 text-gray-500">
                   <div className="flex flex-col items-center gap-4">
                      <Search size={48} className="text-gray-200" />
@@ -289,12 +296,12 @@ function App() {
         image={popupConfig.image} 
       />
       
-      {/* AI Stylist */}
-      <AIStylist products={products} language={language} />
-      
       <main className="transition-all duration-500 ease-in-out flex-grow pb-12">
         {renderContent()}
       </main>
+
+      {/* AI Stylist */}
+      <AIStylist products={products} language={language} />
 
       {/* Toast Notification */}
       {notification && (

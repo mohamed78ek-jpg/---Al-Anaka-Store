@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, X, Globe, ChevronRight, ChevronLeft, Lock } from 'lucide-react';
+import { Home, X, Globe, ChevronRight, ChevronLeft, Lock, Package } from 'lucide-react';
 import { ViewState, Language } from '../types';
 
 interface SidebarProps {
@@ -15,7 +15,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onClose, 
   onChangeView,
   language,
-  onLanguageChange
+  onLanguageChange,
 }) => {
   const isRTL = language === 'ar';
 
@@ -68,19 +68,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {isRTL ? <ChevronLeft className="mr-auto text-gray-300" size={16} /> : <ChevronRight className="ml-auto text-gray-300" size={16} />}
           </button>
 
-          {/* Admin Link */}
+          {/* Track Order Link */}
           <button
             onClick={() => {
-              onChangeView(ViewState.ADMIN);
+              onChangeView(ViewState.TRACK_ORDER);
               onClose();
             }}
             className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all group text-gray-700 hover:text-emerald-600"
           >
             <div className="p-2 bg-gray-100 rounded-lg group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors">
-              <Lock size={20} />
+              <Package size={20} />
             </div>
             <span className="font-medium text-lg">
-              {language === 'ar' ? 'لوحة التحكم' : 'Admin'}
+              {language === 'ar' ? 'تتبع طلباتي' : 'Track Order'}
             </span>
             {isRTL ? <ChevronLeft className="mr-auto text-gray-300" size={16} /> : <ChevronRight className="ml-auto text-gray-300" size={16} />}
           </button>
@@ -124,10 +124,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-6 bg-gray-50 border-t border-gray-100 text-center">
-          <p className="text-xs text-gray-400">
-            © 2024 {language === 'ar' ? 'بازار لوك' : 'Bazzr lok'}
-          </p>
+        <div className="p-6 bg-gray-50 border-t border-gray-100">
+          <button
+            onClick={() => {
+              onChangeView(ViewState.ADMIN);
+              onClose();
+            }}
+            className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white hover:shadow-sm transition-all text-gray-600 hover:text-emerald-600 mb-4"
+          >
+            <Lock size={18} />
+            <span className="font-medium">
+              {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+            </span>
+          </button>
+          
+          <div className="text-center">
+            <p className="text-xs text-gray-400">
+              © 2024 {language === 'ar' ? 'بازار لوك' : 'Bazzr lok'}
+            </p>
+          </div>
         </div>
       </div>
     </>
