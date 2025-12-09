@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, LogOut, Package, ShieldCheck, ChevronDown, Megaphone, ShoppingBag, Phone, MapPin, Mail, User, FileText, X, List, PlusCircle, Image as ImageIcon, MonitorPlay, Settings, Edit, Printer, Upload, MessageSquare, BarChart3, DollarSign, Clock, LayoutGrid, Activity, CheckCircle2, ArrowUpRight } from 'lucide-react';
+import { Plus, Trash2, LogOut, Package, ShieldCheck, ChevronDown, Megaphone, ShoppingBag, Phone, MapPin, Mail, User, FileText, X, List, PlusCircle, Image as ImageIcon, MonitorPlay, Settings, Edit, Printer, Upload, MessageSquare, BarChart3, DollarSign, Clock, LayoutGrid, Activity, CheckCircle2, ArrowUpRight, Server } from 'lucide-react';
 import { Product, Language, Order, PopupConfig, SiteConfig, OrderStatus, Report } from '../types';
 import { APP_CURRENCY } from '../constants';
 
@@ -678,14 +678,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           </div>
 
-          {/* Store Activity Section */}
+          {/* Store Activity Section - UPDATED TO SHOW SERVER STATUS */}
           <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-6">{t('نشاط المتجر', 'Store Activity')}</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-6">{t('حالة النظام', 'System Status')}</h3>
             
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-500 text-sm">{t('المتجر مفتوح ويستقبل الطلبات', 'Store is open and accepting orders')}</span>
-                <div className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-xl border border-green-100">
+                <div className="flex items-center gap-3">
+                   <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center text-green-700">
+                      <Server size={18} />
+                   </div>
+                   <div>
+                      <h4 className="font-bold text-gray-800 text-sm">{t('السيرفر متصل', 'Server Online')}</h4>
+                      <p className="text-green-600 text-xs">{t('يعمل بكفاءة عالية', 'Running smoothly')}</p>
+                   </div>
+                </div>
+                <div className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.5)] animate-pulse"></div>
               </div>
               
               <div className="flex items-center justify-between">

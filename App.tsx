@@ -7,59 +7,24 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { AdPopup } from './components/AdPopup';
 import { TrackOrder } from './components/TrackOrder';
 import { ReportProblem } from './components/ReportProblem';
+import { LoadingScreen } from './components/LoadingScreen';
 import { PRODUCTS } from './constants';
 import { Product, CartItem, ViewState, Language, Order, PopupConfig, SiteConfig, OrderStatus, Report } from './types';
 import { Search, Mail, Banknote } from 'lucide-react';
+import { mockServer } from './services/mockServer';
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState<ViewState>(ViewState.HOME);
   
-  // Initialize state from localStorage with fallbacks
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('cart');
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) { return []; }
-  });
-
-  const [orders, setOrders] = useState<Order[]>(() => {
-    try {
-      const saved = localStorage.getItem('orders');
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) { return []; }
-  });
-
-  const [reports, setReports] = useState<Report[]>(() => {
-    try {
-      const saved = localStorage.getItem('reports');
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) { return []; }
-  });
-
-  const [products, setProducts] = useState<Product[]>(() => {
-    try {
-      const saved = localStorage.getItem('products');
-      return saved ? JSON.parse(saved) : PRODUCTS;
-    } catch (e) { return PRODUCTS; }
-  });
-
-  const [bannerText, setBannerText] = useState(() => {
-    return localStorage.getItem('bannerText') || 'أهلاً بكم في بازار لوك - خصومات تصل إلى 50% على التشكيلة الجديدة! 🌟 شحن مجاني للطلبات فوق 300 د.م';
-  });
-
-  const [popupConfig, setPopupConfig] = useState<PopupConfig>(() => {
-    try {
-      const saved = localStorage.getItem('popupConfig');
-      return saved ? JSON.parse(saved) : { isActive: false, image: '' };
-    } catch (e) { return { isActive: false, image: '' }; }
-  });
-
-  const [siteConfig, setSiteConfig] = useState<SiteConfig>(() => {
-    try {
-      const saved = localStorage.getItem('siteConfig');
-      return saved ? JSON.parse(saved) : { enableTrackOrder: true };
-    } catch (e) { return { enableTrackOrder: true }; }
-  });
+  // State definitions (Initialized empty, populated by server)
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [products, setProducts] = useState<Product[]>(PRODUCTS);
+  const [bannerText, setBannerText] = useState('');
+  const [popupConfig, setPopupConfig] = useState<PopupConfig>({ isActive: false, image: '' });
+  const [siteConfig, setSiteConfig] = useState<SiteConfig>({ enableTrackOrder: true });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
@@ -68,14 +33,34 @@ function App() {
   const [language, setLanguage] = useState<Language>('ar');
   const [showAdPopup, setShowAdPopup] = useState(false);
 
-  // Persistence Effects
-  useEffect(() => { localStorage.setItem('cart', JSON.stringify(cart)); }, [cart]);
-  useEffect(() => { localStorage.setItem('orders', JSON.stringify(orders)); }, [orders]);
-  useEffect(() => { localStorage.setItem('reports', JSON.stringify(reports)); }, [reports]);
-  useEffect(() => { localStorage.setItem('products', JSON.stringify(products)); }, [products]);
-  useEffect(() => { localStorage.setItem('bannerText', bannerText); }, [bannerText]);
-  useEffect(() => { localStorage.setItem('popupConfig', JSON.stringify(popupConfig)); }, [popupConfig]);
-  useEffect(() => { localStorage.setItem('siteConfig', JSON.stringify(siteConfig)); }, [siteConfig]);
+  // Initial Server Connection Simulation
+  useEffect(() => {
+    const initApp = async () => {
+      await mockServer.connect();
+      const data = await mockServer.fetchAllData();
+      
+      setProducts(data.products);
+      setOrders(data.orders);
+      setReports(data.reports);
+      setCart(data.cart);
+      setBannerText(data.bannerText);
+      setPopupConfig(data.popupConfig);
+      setSiteConfig(data.siteConfig);
+      
+      setIsLoading(false);
+    };
+
+    initApp();
+  }, []);
+
+  // Persistence Effects (Sync with "Server"/LocalStorage)
+  useEffect(() => { if (!isLoading) mockServer.saveCart(cart); }, [cart, isLoading]);
+  useEffect(() => { if (!isLoading) mockServer.saveOrders(orders); }, [orders, isLoading]);
+  useEffect(() => { if (!isLoading) mockServer.saveReports(reports); }, [reports, isLoading]);
+  useEffect(() => { if (!isLoading) mockServer.saveProducts(products); }, [products, isLoading]);
+  useEffect(() => { if (!isLoading) mockServer.saveBanner(bannerText); }, [bannerText, isLoading]);
+  useEffect(() => { if (!isLoading) mockServer.savePopupConfig(popupConfig); }, [popupConfig, isLoading]);
+  useEffect(() => { if (!isLoading) mockServer.saveSiteConfig(siteConfig); }, [siteConfig, isLoading]);
 
   // Handle Direction and Language
   useEffect(() => {
@@ -85,12 +70,13 @@ function App() {
 
   // Show Popup if active
   useEffect(() => {
-    if (popupConfig.isActive && popupConfig.image) {
-      setShowAdPopup(true);
+    if (!isLoading && popupConfig.isActive && popupConfig.image) {
+      const timer = setTimeout(() => setShowAdPopup(true), 2000); // Small delay after load
+      return () => clearTimeout(timer);
     } else {
       setShowAdPopup(false);
     }
-  }, [popupConfig.isActive, popupConfig.image]);
+  }, [popupConfig.isActive, popupConfig.image, isLoading]);
 
   // Translation helper
   const t = (ar: string, en: string) => language === 'ar' ? ar : en;
@@ -224,6 +210,21 @@ function App() {
     ));
     showNotification(t('تم تحديث حالة الطلب', 'Order status updated'));
   };
+
+  const handleImportData = (data: any) => {
+    if (data.products && Array.isArray(data.products)) setProducts(data.products);
+    if (data.orders && Array.isArray(data.orders)) setOrders(data.orders);
+    if (data.reports && Array.isArray(data.reports)) setReports(data.reports);
+    if (data.bannerText) setBannerText(data.bannerText);
+    if (data.popupConfig) setPopupConfig(data.popupConfig);
+    if (data.siteConfig) setSiteConfig(data.siteConfig);
+    
+    showNotification(t('تم استيراد البيانات وتحديث المتجر بنجاح', 'Data imported and store updated successfully'));
+  };
+
+  if (isLoading) {
+    return <LoadingScreen language={language} />;
+  }
 
   const renderContent = () => {
     switch (currentView) {
