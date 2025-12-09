@@ -25,8 +25,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
   return (
     <div className="group relative flex flex-col bg-white border border-black rounded-[2rem] p-2 shadow-sm hover:shadow-md transition-all duration-300 h-full">
       
-      {/* Image Container - Aspect Square */}
-      <div className="relative aspect-square rounded-[1.5rem] overflow-hidden mb-2 bg-gray-50">
+      {/* Image Container - Reduced height aspect-[5/4] */}
+      <div className="relative aspect-[5/4] rounded-[1.5rem] overflow-hidden mb-2 bg-gray-50">
         <img
           src={product.image}
           alt={product.name}
@@ -41,14 +41,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
       </div>
       
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center text-center px-1 pb-2">
-        <h3 className="text-sm font-bold text-gray-900 line-clamp-1 mb-2 font-tajawal">
+      <div className="flex-1 flex flex-col items-center text-center px-1 pb-1">
+        <h3 className="text-sm font-bold text-gray-900 line-clamp-1 mb-1 font-tajawal">
           {product.name}
         </h3>
 
         {/* Size Selection - Direct Display */}
         {product.sizes && product.sizes.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-1 mb-2 w-full">
+          <div className="flex flex-wrap justify-center gap-1 mb-1 w-full">
             {product.sizes.map((size) => (
               <button
                 key={size}
@@ -66,7 +66,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
           </div>
         )}
         
-        <div className="mt-auto mb-3 flex flex-col items-center justify-center gap-0">
+        <div className="mt-auto mb-2 flex flex-col items-center justify-center gap-0">
           {originalPrice && (
             <span className="text-gray-400 line-through text-[10px] font-bold font-sans opacity-60">
               {APP_CURRENCY} {originalPrice}.00
@@ -78,7 +78,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
         </div>
 
         {/* Action Area */}
-        <div className="w-full h-[36px]">
+        <div className="w-full h-[32px]">
             <button
               onClick={handleAddToCart}
               className="w-full h-full bg-[#22c55e] hover:bg-emerald-600 text-white text-xs font-bold rounded-full transition-colors shadow-sm active:scale-95 font-tajawal flex items-center justify-center"
