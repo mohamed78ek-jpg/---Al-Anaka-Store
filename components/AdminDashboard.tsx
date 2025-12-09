@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, LogOut, Package, ShieldCheck, ChevronDown, Megaphone, ShoppingBag, Phone, MapPin, Mail, User, FileText, X, List, PlusCircle, Image as ImageIcon, MonitorPlay, Settings, Edit, Printer, Upload } from 'lucide-react';
-import { Product, Language, Order, PopupConfig, SiteConfig, OrderStatus } from '../types';
+import { Plus, Trash2, LogOut, Package, ShieldCheck, ChevronDown, Megaphone, ShoppingBag, Phone, MapPin, Mail, User, FileText, X, List, PlusCircle, Image as ImageIcon, MonitorPlay, Settings, Edit, Printer, Upload, MessageSquare } from 'lucide-react';
+import { Product, Language, Order, PopupConfig, SiteConfig, OrderStatus, Report } from '../types';
 import { APP_CURRENCY } from '../constants';
 
 interface AdminDashboardProps {
   products: Product[];
   orders: Order[];
+  reports: Report[];
   onAddProduct: (product: Product) => void;
   onRemoveProduct: (id: number) => void;
+  onRemoveReport: (id: number) => void;
   language: Language;
   bannerText: string;
   onUpdateBannerText: (text: string) => void;
@@ -21,8 +23,10 @@ interface AdminDashboardProps {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ 
   products, 
   orders,
+  reports,
   onAddProduct, 
   onRemoveProduct,
+  onRemoveReport,
   language,
   bannerText,
   onUpdateBannerText,
@@ -39,7 +43,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [newPasswordInput, setNewPasswordInput] = useState(''); // For changing password
   const [error, setError] = useState('');
   
-  const [activeTab, setActiveTab] = useState<'orders' | 'add_product' | 'product_list' | 'banner' | 'popup' | 'settings'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'add_product' | 'product_list' | 'banner' | 'popup' | 'settings' | 'reports'>('orders');
   
   // State for Order Management Modal
   const [selectedOrderForEdit, setSelectedOrderForEdit] = useState<Order | null>(null);
@@ -543,7 +547,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       </div>
 
       {/* Navigation Tabs */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-2 md:gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-7 gap-2 md:gap-4 mb-8">
         <button
           onClick={() => setActiveTab('orders')}
           className={`p-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
@@ -557,6 +561,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <span className="md:hidden">{t('طلبات', 'Orders')}</span>
           {orders.length > 0 && (
             <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full ml-1">{orders.length}</span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('reports')}
+          className={`p-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
+            activeTab === 'reports' 
+              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200' 
+              : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-200'
+          }`}
+        >
+          <MessageSquare size={20} />
+          <span className="hidden md:inline">{t('الرسائل', 'Messages')}</span>
+          <span className="md:hidden">{t('رسائل', 'Messages')}</span>
+          {reports.length > 0 && (
+            <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full ml-1">{reports.length}</span>
           )}
         </button>
 
@@ -702,6 +722,53 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* REPORTS TAB */}
+        {activeTab === 'reports' && (
+          <div>
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+              <MessageSquare className="text-emerald-600" />
+              {t('رسائل البلاغات', 'Report Messages')}
+            </h2>
+            {reports.length === 0 ? (
+              <div className="text-center py-12 text-gray-400">
+                <Mail size={48} className="mx-auto mb-4 opacity-50" />
+                <p>{t('لا توجد رسائل جديدة', 'No new messages')}</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {reports.map((report) => (
+                  <div key={report.id} className="border border-gray-200 rounded-xl p-6 hover:border-emerald-500 transition-colors bg-gray-50/50">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="font-bold text-lg text-gray-900 mb-1">{report.subject}</h3>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                           <span className="flex items-center gap-1"><Mail size={14}/> {report.email}</span>
+                           <span>•</span>
+                           <span>{new Date(report.date).toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (window.confirm(t('هل أنت متأكد من حذف هذه الرسالة؟', 'Are you sure you want to delete this message?'))) {
+                            onRemoveReport(report.id);
+                          }
+                        }}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title={t('حذف', 'Delete')}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border border-gray-100 text-gray-700 text-sm whitespace-pre-wrap leading-relaxed">
+                      {report.message}
                     </div>
                   </div>
                 ))}

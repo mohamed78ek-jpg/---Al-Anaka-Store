@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { AlertTriangle, ArrowRight, Send } from 'lucide-react';
-import { Language } from '../types';
+import { Language, Report } from '../types';
 
 interface ReportProblemProps {
   onBack: () => void;
+  onSubmitReport: (reportData: Omit<Report, 'id' | 'date'>) => void;
   language: Language;
 }
 
-export const ReportProblem: React.FC<ReportProblemProps> = ({ onBack, language }) => {
+export const ReportProblem: React.FC<ReportProblemProps> = ({ onBack, onSubmitReport, language }) => {
   const [formData, setFormData] = useState({
     subject: '',
     message: '',
@@ -19,10 +20,14 @@ export const ReportProblem: React.FC<ReportProblemProps> = ({ onBack, language }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitted(true);
-    }, 1000);
+    
+    onSubmitReport({
+      subject: formData.subject,
+      email: formData.email,
+      message: formData.message
+    });
+
+    setIsSubmitted(true);
   };
 
   return (

@@ -55,3 +55,11 @@ export interface PopupConfig {
 export interface SiteConfig {
   enableTrackOrder: boolean;
 }
+
+export interface Report {
+  id: number;
+  subject: string;
+  email: string;
+  message: string;
+  date: string;
+}

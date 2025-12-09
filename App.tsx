@@ -5,11 +5,10 @@ import { Cart } from './components/Cart';
 import { Sidebar } from './components/Sidebar';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AdPopup } from './components/AdPopup';
-import { AIStylist } from './components/AIStylist';
 import { TrackOrder } from './components/TrackOrder';
 import { ReportProblem } from './components/ReportProblem';
 import { PRODUCTS } from './constants';
-import { Product, CartItem, ViewState, Language, Order, PopupConfig, SiteConfig, OrderStatus } from './types';
+import { Product, CartItem, ViewState, Language, Order, PopupConfig, SiteConfig, OrderStatus, Report } from './types';
 import { Search, Mail, Banknote } from 'lucide-react';
 
 function App() {
@@ -26,6 +25,13 @@ function App() {
   const [orders, setOrders] = useState<Order[]>(() => {
     try {
       const saved = localStorage.getItem('orders');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) { return []; }
+  });
+
+  const [reports, setReports] = useState<Report[]>(() => {
+    try {
+      const saved = localStorage.getItem('reports');
       return saved ? JSON.parse(saved) : [];
     } catch (e) { return []; }
   });
@@ -65,6 +71,7 @@ function App() {
   // Persistence Effects
   useEffect(() => { localStorage.setItem('cart', JSON.stringify(cart)); }, [cart]);
   useEffect(() => { localStorage.setItem('orders', JSON.stringify(orders)); }, [orders]);
+  useEffect(() => { localStorage.setItem('reports', JSON.stringify(reports)); }, [reports]);
   useEffect(() => { localStorage.setItem('products', JSON.stringify(products)); }, [products]);
   useEffect(() => { localStorage.setItem('bannerText', bannerText); }, [bannerText]);
   useEffect(() => { localStorage.setItem('popupConfig', JSON.stringify(popupConfig)); }, [popupConfig]);
@@ -179,6 +186,20 @@ function App() {
     setCurrentView(ViewState.HOME);
   };
 
+  const handleSubmitReport = (reportData: Omit<Report, 'id' | 'date'>) => {
+    const newReport: Report = {
+      ...reportData,
+      id: Date.now(),
+      date: new Date().toISOString()
+    };
+    setReports(prev => [newReport, ...prev]);
+  };
+
+  const handleRemoveReport = (id: number) => {
+    setReports(prev => prev.filter(r => r.id !== id));
+    showNotification(t('تم حذف الرسالة', 'Message deleted'));
+  };
+
   // Admin Functions
   const handleAddProduct = (newProduct: Product) => {
     setProducts(prev => [...prev, newProduct]);
@@ -211,8 +232,10 @@ function App() {
           <AdminDashboard 
             products={products}
             orders={orders}
+            reports={reports}
             onAddProduct={handleAddProduct}
             onRemoveProduct={handleRemoveProduct}
+            onRemoveReport={handleRemoveReport}
             language={language}
             bannerText={bannerText}
             onUpdateBannerText={setBannerText}
@@ -246,6 +269,7 @@ function App() {
         return (
           <ReportProblem 
             onBack={() => setCurrentView(ViewState.HOME)}
+            onSubmitReport={handleSubmitReport}
             language={language}
           />
         );
@@ -354,9 +378,6 @@ function App() {
       <main className="transition-all duration-500 ease-in-out flex-grow pb-12">
         {renderContent()}
       </main>
-
-      {/* AI Stylist */}
-      <AIStylist products={products} language={language} />
 
       {/* Toast Notification */}
       {notification && (
