@@ -1,6 +1,6 @@
 import React from 'react';
 import { Home, X, ChevronRight, ChevronLeft, Lock, Package, AlertTriangle } from 'lucide-react';
-import { ViewState, Language } from '../types';
+import { ViewState, Language, SiteConfig } from '../types';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -8,7 +8,7 @@ interface SidebarProps {
   onChangeView: (view: ViewState) => void;
   language: Language;
   onLanguageChange: (lang: Language) => void;
-  siteConfig?: any;
+  siteConfig: SiteConfig;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -17,6 +17,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onChangeView,
   language,
   onLanguageChange,
+  siteConfig
 }) => {
   const isRTL = language === 'ar';
 
@@ -69,22 +70,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {isRTL ? <ChevronLeft className="mr-auto text-emerald-200 group-hover:text-emerald-500 transition-colors" size={18} /> : <ChevronRight className="ml-auto text-emerald-200 group-hover:text-emerald-500 transition-colors" size={18} />}
           </button>
 
-          {/* Track Order Link - Blue */}
-          <button
-            onClick={() => {
-              onChangeView(ViewState.TRACK_ORDER);
-              onClose();
-            }}
-            className="w-full flex items-center gap-4 p-4 rounded-xl transition-all group bg-white border border-transparent hover:border-blue-100 hover:bg-blue-50"
-          >
-            <div className="p-2.5 bg-blue-100 rounded-xl text-blue-600 shadow-sm transition-transform group-hover:scale-110">
-              <Package size={22} />
-            </div>
-            <span className="font-bold text-lg text-gray-700 group-hover:text-blue-700">
-              {language === 'ar' ? 'تتبع طلباتي' : 'Track Order'}
-            </span>
-            {isRTL ? <ChevronLeft className="mr-auto text-blue-200 group-hover:text-blue-500 transition-colors" size={18} /> : <ChevronRight className="ml-auto text-blue-200 group-hover:text-blue-500 transition-colors" size={18} />}
-          </button>
+          {/* Track Order Link - Blue - Conditioned by siteConfig */}
+          {siteConfig?.enableTrackOrder && (
+            <button
+              onClick={() => {
+                onChangeView(ViewState.TRACK_ORDER);
+                onClose();
+              }}
+              className="w-full flex items-center gap-4 p-4 rounded-xl transition-all group bg-white border border-transparent hover:border-blue-100 hover:bg-blue-50"
+            >
+              <div className="p-2.5 bg-blue-100 rounded-xl text-blue-600 shadow-sm transition-transform group-hover:scale-110">
+                <Package size={22} />
+              </div>
+              <span className="font-bold text-lg text-gray-700 group-hover:text-blue-700">
+                {language === 'ar' ? 'تتبع طلباتي' : 'Track Order'}
+              </span>
+              {isRTL ? <ChevronLeft className="mr-auto text-blue-200 group-hover:text-blue-500 transition-colors" size={18} /> : <ChevronRight className="ml-auto text-blue-200 group-hover:text-blue-500 transition-colors" size={18} />}
+            </button>
+          )}
 
           {/* Report Problem Link - Orange */}
           <button
