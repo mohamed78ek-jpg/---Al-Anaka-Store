@@ -778,6 +778,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </div>
                       </div>
                     </div>
+
+                    {/* NEW: Ordered Products List */}
+                    <div className="mt-4 border-t border-gray-100 pt-4">
+                      <h4 className="text-xs font-bold text-gray-500 mb-3">{t('المنتجات المطلوبة', 'Ordered Items')}</h4>
+                      <div className="space-y-3">
+                        {order.items.map((item, idx) => (
+                          <div key={idx} className="flex items-center gap-3 bg-gray-50 p-2 rounded-xl">
+                            <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0 bg-white">
+                              <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-bold text-gray-900 line-clamp-1">{item.name}</p>
+                              <div className="text-xs text-gray-500 flex items-center flex-wrap gap-2 mt-0.5">
+                                <span className="font-medium text-emerald-600">{item.price} {APP_CURRENCY}</span>
+                                <span>× {item.quantity}</span>
+                                {item.selectedSize && (
+                                  <span className="bg-white px-1.5 py-0.5 rounded text-[10px] border border-gray-200">
+                                    {item.selectedSize}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                   </div>
                 ))}
               </div>
