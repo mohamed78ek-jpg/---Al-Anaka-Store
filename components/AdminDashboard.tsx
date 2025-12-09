@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, LogOut, Package, ShieldCheck, ChevronDown, Megaphone, ShoppingBag, Phone, MapPin, Mail, User, FileText, X, List, PlusCircle, Image as ImageIcon, MonitorPlay, Settings, Edit, Printer, Upload, MessageSquare } from 'lucide-react';
+import { Plus, Trash2, LogOut, Package, ShieldCheck, ChevronDown, Megaphone, ShoppingBag, Phone, MapPin, Mail, User, FileText, X, List, PlusCircle, Image as ImageIcon, MonitorPlay, Settings, Edit, Printer, Upload, MessageSquare, BarChart3, DollarSign, Clock } from 'lucide-react';
 import { Product, Language, Order, PopupConfig, SiteConfig, OrderStatus, Report } from '../types';
 import { APP_CURRENCY } from '../constants';
 
@@ -44,7 +44,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [newPasswordInput, setNewPasswordInput] = useState(''); // For changing password
   const [error, setError] = useState('');
   
-  const [activeTab, setActiveTab] = useState<'orders' | 'add_product' | 'product_list' | 'banner' | 'popup' | 'settings' | 'reports'>('orders');
+  const [activeTab, setActiveTab] = useState<'stats' | 'orders' | 'add_product' | 'product_list' | 'banner' | 'popup' | 'settings' | 'reports'>('stats');
   
   // State for Order Management Modal
   const [selectedOrderForEdit, setSelectedOrderForEdit] = useState<Order | null>(null);
@@ -61,6 +61,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   });
 
   const t = (ar: string, en: string) => language === 'ar' ? ar : en;
+
+  // Statistics Calculation
+  const stats = {
+    totalRevenue: orders
+      .filter(o => o.status !== 'cancelled')
+      .reduce((acc, curr) => acc + curr.totalAmount, 0),
+    totalOrders: orders.length,
+    pendingOrders: orders.filter(o => o.status === 'pending').length,
+    totalProducts: products.length
+  };
 
   // Predefined Categories
   const CATEGORIES = ['رجال', 'أطفال', 'أحذية', 'اكسسوارات'];
@@ -556,7 +566,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       </div>
 
       {/* Navigation Tabs */}
-      <div className="grid grid-cols-2 md:grid-cols-7 gap-2 md:gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2 md:gap-3 mb-8">
+        
+        <button
+          onClick={() => setActiveTab('stats')}
+          className={`p-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
+            activeTab === 'stats' 
+              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200' 
+              : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-200'
+          }`}
+        >
+          <BarChart3 size={20} />
+          <span className="hidden md:inline">{t('الإحصائيات', 'Statistics')}</span>
+          <span className="md:hidden">{t('إحصائيات', 'Stats')}</span>
+        </button>
+
         <button
           onClick={() => setActiveTab('orders')}
           className={`p-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
@@ -658,6 +682,65 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* Content Area */}
       <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm min-h-[400px]">
         
+        {/* STATISTICS TAB */}
+        {activeTab === 'stats' && (
+          <div>
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+              <BarChart3 className="text-emerald-600" />
+              {t('الإحصائيات العامة', 'General Statistics')}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Total Revenue */}
+              <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 transition-transform hover:scale-105 duration-300">
+                <div className="flex justify-between items-start mb-4">
+                    <div className="p-3 bg-emerald-100 rounded-xl text-emerald-600">
+                        <DollarSign size={24} />
+                    </div>
+                </div>
+                <h3 className="text-gray-500 text-sm font-bold mb-1">{t('إجمالي المبيعات', 'Total Revenue')}</h3>
+                <p className="text-3xl font-black text-gray-900" dir="ltr">{stats.totalRevenue.toFixed(2)} {APP_CURRENCY}</p>
+                <p className="text-xs text-emerald-600 mt-2 font-medium">{t('صافي الأرباح (باستثناء الملغي)', 'Net Revenue (Excl. Cancelled)')}</p>
+              </div>
+
+              {/* Total Orders */}
+              <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 transition-transform hover:scale-105 duration-300">
+                <div className="flex justify-between items-start mb-4">
+                    <div className="p-3 bg-blue-100 rounded-xl text-blue-600">
+                        <ShoppingBag size={24} />
+                    </div>
+                </div>
+                <h3 className="text-gray-500 text-sm font-bold mb-1">{t('إجمالي الطلبات', 'Total Orders')}</h3>
+                <p className="text-3xl font-black text-gray-900">{stats.totalOrders}</p>
+                <p className="text-xs text-blue-600 mt-2 font-medium">{t('كل الطلبات المسجلة', 'All registered orders')}</p>
+              </div>
+
+               {/* Total Products */}
+               <div className="bg-purple-50 p-6 rounded-2xl border border-purple-100 transition-transform hover:scale-105 duration-300">
+                <div className="flex justify-between items-start mb-4">
+                    <div className="p-3 bg-purple-100 rounded-xl text-purple-600">
+                        <Package size={24} />
+                    </div>
+                </div>
+                <h3 className="text-gray-500 text-sm font-bold mb-1">{t('عدد المنتجات', 'Total Products')}</h3>
+                <p className="text-3xl font-black text-gray-900">{stats.totalProducts}</p>
+                <p className="text-xs text-purple-600 mt-2 font-medium">{t('منتجات معروضة للبيع', 'Products available for sale')}</p>
+              </div>
+
+               {/* Pending Orders */}
+               <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100 transition-transform hover:scale-105 duration-300">
+                <div className="flex justify-between items-start mb-4">
+                    <div className="p-3 bg-orange-100 rounded-xl text-orange-600">
+                        <Clock size={24} />
+                    </div>
+                </div>
+                <h3 className="text-gray-500 text-sm font-bold mb-1">{t('طلبات قيد الانتظار', 'Pending Orders')}</h3>
+                <p className="text-3xl font-black text-gray-900">{stats.pendingOrders}</p>
+                <p className="text-xs text-orange-600 mt-2 font-medium">{t('تحتاج إلى مراجعة', 'Needs review')}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ORDERS TAB */}
         {activeTab === 'orders' && (
           <div>
