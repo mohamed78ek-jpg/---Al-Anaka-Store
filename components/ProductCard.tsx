@@ -23,9 +23,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
   };
 
   return (
-    <div className="group relative flex flex-col bg-white border border-black rounded-[2rem] p-2.5 shadow-sm hover:shadow-md transition-all duration-300 h-full">
+    <div className="group relative flex flex-col bg-white border border-black rounded-[2rem] p-3 shadow-sm hover:shadow-md transition-all duration-300 h-full">
       
-      {/* Image Container */}
+      {/* Image Container - Reduced height to aspect-square */}
       <div className="relative aspect-square rounded-[1.5rem] overflow-hidden mb-2 bg-gray-50">
         <img
           src={product.image}
@@ -41,7 +41,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
       </div>
       
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center text-center px-1 pb-1">
+      <div className="flex-1 flex flex-col items-center text-center px-1 pb-2">
         <h3 className="text-base font-bold text-gray-900 line-clamp-1 mb-2 font-tajawal">
           {product.name}
         </h3>
@@ -78,10 +78,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
         </div>
 
         {/* Action Area */}
-        <div className="w-full h-[42px]">
+        <div className="w-full h-[40px]">
             <button
               onClick={handleAddToCart}
-              className="w-full h-full bg-[#22c55e] hover:bg-emerald-600 text-white text-base font-bold rounded-full transition-colors shadow-sm active:scale-95 font-tajawal flex items-center justify-center"
+              className="w-full h-full bg-[#22c55e] hover:bg-emerald-600 text-white text-sm font-bold rounded-full transition-colors shadow-sm active:scale-95 font-tajawal flex items-center justify-center"
             >
               أضف إلى السلة
             </button>
