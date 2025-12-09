@@ -977,34 +977,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               {t('الإعدادات العامة', 'General Settings')}
             </h2>
 
-            {/* Site Settings */}
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-              <h3 className="font-bold text-lg mb-4 text-gray-800">{t('إعدادات الموقع', 'Site Settings')}</h3>
-              
-              <div className="flex items-center justify-between p-2">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${siteConfig.enableTrackOrder ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-200 text-gray-500'}`}>
-                    <Package size={20} />
-                  </div>
-                  <span className="font-bold text-gray-700">{t('تفعيل تتبع الطلبات', 'Enable Order Tracking')}</span>
-                </div>
-                
-                <button
-                  onClick={() => onUpdateSiteConfig({ ...siteConfig, enableTrackOrder: !siteConfig.enableTrackOrder })}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    siteConfig.enableTrackOrder ? 'bg-emerald-600' : 'bg-gray-300'
-                  }`}
-                  dir="ltr"
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      siteConfig.enableTrackOrder ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-
             {/* Password Change */}
             <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
               <h3 className="font-bold text-lg mb-4 text-gray-800">{t('تغيير كلمة المرور', 'Change Password')}</h3>
