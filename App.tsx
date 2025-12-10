@@ -25,6 +25,7 @@ function App() {
   const [bannerText, setBannerText] = useState('');
   const [popupConfig, setPopupConfig] = useState<PopupConfig>({ isActive: false, image: '' });
   const [siteConfig, setSiteConfig] = useState<SiteConfig>({ enableTrackOrder: true });
+  const [visitorCount, setVisitorCount] = useState<number>(0);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
@@ -38,6 +39,10 @@ function App() {
     const initApp = async () => {
       try {
         await mockServer.connect();
+        
+        // Track visit
+        await mockServer.incrementVisit();
+
         const data = await mockServer.fetchAllData();
         
         if (data.products && data.products.length > 0) {
@@ -50,6 +55,8 @@ function App() {
         setBannerText(data.bannerText || '');
         setPopupConfig(data.popupConfig || { isActive: false, image: '' });
         setSiteConfig(data.siteConfig || { enableTrackOrder: true });
+        setVisitorCount(data.visitors || 0);
+
       } catch (error) {
         console.error("Failed to load app data:", error);
         // Fallback is already handled by initial state
@@ -250,6 +257,7 @@ function App() {
             onUpdateSiteConfig={setSiteConfig}
             onUpdateOrderStatus={handleUpdateOrderStatus}
             onResetData={handleResetData}
+            visitorCount={visitorCount}
           />
         );
       case ViewState.CART:

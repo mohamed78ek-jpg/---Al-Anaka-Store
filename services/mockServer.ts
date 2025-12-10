@@ -10,6 +10,7 @@ const DB_KEYS = {
   POPUP: 'popupConfig',
   SITE: 'siteConfig',
   CART: 'cart',
+  VISITORS: 'visitors', // New Key
   // Connection Config Keys
   SUPABASE_URL: 'sb_url',
   SUPABASE_KEY: 'sb_key'
@@ -64,6 +65,45 @@ export const mockServer = {
     window.location.reload();
   },
 
+  // New: Handle Visitor Counting
+  incrementVisit: async () => {
+    // Check if this session already counted
+    if (sessionStorage.getItem('visit_counted')) {
+      return;
+    }
+
+    // 1. Local Increment
+    let currentCount = parseInt(localStorage.getItem(DB_KEYS.VISITORS) || '120');
+    currentCount++;
+    localStorage.setItem(DB_KEYS.VISITORS, currentCount.toString());
+    sessionStorage.setItem('visit_counted', 'true');
+
+    // 2. Cloud Increment (If connected)
+    const client = initSupabase();
+    if (client) {
+      try {
+        // Fetch current cloud value first to ensure accuracy
+        const { data } = await client
+          .from('store_data')
+          .select('value')
+          .eq('key', DB_KEYS.VISITORS)
+          .single();
+        
+        let cloudCount = data?.value ? parseInt(data.value) : currentCount;
+        // If local was higher (offline mode previously), keep local, else increment cloud
+        if (cloudCount < currentCount) cloudCount = currentCount;
+        else cloudCount++;
+
+        await client.from('store_data').upsert(
+          { key: DB_KEYS.VISITORS, value: cloudCount },
+          { onConflict: 'key' }
+        );
+      } catch (e) {
+        console.error("Failed to sync visitor count", e);
+      }
+    }
+  },
+
   fetchAllData: async () => {
     const client = initSupabase();
 
@@ -75,7 +115,8 @@ export const mockServer = {
       cart: getLocalJSON(DB_KEYS.CART, []),
       bannerText: localStorage.getItem(DB_KEYS.BANNER) || 'أهلاً بكم في بازار لوك - خصومات تصل إلى 50% على التشكيلة الجديدة! 🌟',
       popupConfig: getLocalJSON(DB_KEYS.POPUP, { isActive: false, image: '' }),
-      siteConfig: getLocalJSON(DB_KEYS.SITE, { enableTrackOrder: true })
+      siteConfig: getLocalJSON(DB_KEYS.SITE, { enableTrackOrder: true }),
+      visitors: parseInt(localStorage.getItem(DB_KEYS.VISITORS) || '120')
     };
 
     // If connected to Supabase, try to fetch from there
@@ -102,7 +143,13 @@ export const mockServer = {
           if (map[DB_KEYS.BANNER]) data.bannerText = map[DB_KEYS.BANNER];
           if (map[DB_KEYS.POPUP]) data.popupConfig = map[DB_KEYS.POPUP];
           if (map[DB_KEYS.SITE]) data.siteConfig = map[DB_KEYS.SITE];
+          if (map[DB_KEYS.VISITORS]) data.visitors = parseInt(map[DB_KEYS.VISITORS]);
           
+          // Update local visitor count to match cloud if cloud is higher
+          if (map[DB_KEYS.VISITORS] && map[DB_KEYS.VISITORS] > data.visitors) {
+             localStorage.setItem(DB_KEYS.VISITORS, map[DB_KEYS.VISITORS]);
+          }
+
           console.log("Cloud sync successful");
         } else {
             console.warn("Could not fetch from Supabase (Tables might not exist yet). Using local data.", error);

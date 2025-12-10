@@ -20,6 +20,7 @@ interface AdminDashboardProps {
   onUpdateSiteConfig: (config: SiteConfig) => void;
   onUpdateOrderStatus: (orderId: string, newStatus: OrderStatus) => void;
   onResetData: () => void;
+  visitorCount: number;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ 
@@ -37,7 +38,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   siteConfig,
   onUpdateSiteConfig,
   onUpdateOrderStatus,
-  onResetData
+  onResetData,
+  visitorCount
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
@@ -733,7 +735,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-gray-500 text-sm">{t('عدد الزوار اليوم: 124', 'Visitors today: 124')}</span>
+                <span className="text-gray-500 text-sm">{t(`عدد الزوار: ${visitorCount}`, `Visitors: ${visitorCount}`)}</span>
                  <div className="w-2.5 h-2.5 bg-gray-300 rounded-full"></div>
               </div>
             </div>
