@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Package, ShieldCheck, ChevronDown, Megaphone, ShoppingBag, Phone, User, X, List, PlusCircle, Image as ImageIcon, MonitorPlay, Settings, Edit, Printer, Upload, MessageSquare, DollarSign, LayoutGrid, ArrowUpRight, Server } from 'lucide-react';
+import { Plus, Trash2, Package, ShieldCheck, ChevronDown, Megaphone, ShoppingBag, Phone, User, X, List, PlusCircle, Image as ImageIcon, MonitorPlay, Settings, Edit, Printer, Upload, MessageSquare, DollarSign, LayoutGrid, ArrowUpRight, Server, RefreshCw } from 'lucide-react';
 import { Product, Language, Order, PopupConfig, SiteConfig, OrderStatus, Report } from '../types';
 import { APP_CURRENCY } from '../constants';
 
@@ -18,6 +18,7 @@ interface AdminDashboardProps {
   siteConfig: SiteConfig;
   onUpdateSiteConfig: (config: SiteConfig) => void;
   onUpdateOrderStatus: (orderId: string, newStatus: OrderStatus) => void;
+  onResetData: () => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ 
@@ -34,7 +35,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onUpdatePopupConfig,
   siteConfig,
   onUpdateSiteConfig,
-  onUpdateOrderStatus
+  onUpdateOrderStatus,
+  onResetData
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
@@ -1081,6 +1083,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   {t('حفظ', 'Save')}
                 </button>
               </form>
+            </div>
+
+            {/* Reset Data Section */}
+            <div className="bg-red-50 p-6 rounded-3xl border border-red-100 shadow-sm">
+               <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-red-600 shadow-sm">
+                    <RefreshCw size={20} />
+                  </div>
+                  <h3 className="font-bold text-lg text-red-900">{t('إعادة ضبط المصنع', 'Factory Reset')}</h3>
+               </div>
+               <p className="text-sm text-red-700/80 mb-6 leading-relaxed">
+                 {t(
+                   'تحذير: هذا الإجراء سيقوم بمسح جميع البيانات (المنتجات، الطلبات، الإعدادات) المخزنة على هذا الجهاز والعودة إلى الحالة الأصلية. استخدمه فقط في حالة وجود مشاكل.',
+                   'Warning: This action will erase all data (products, orders, settings) stored on this device and revert to the original state. Use only if experiencing issues.'
+                 )}
+               </p>
+               <button
+                 onClick={onResetData}
+                 className="w-full py-4 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors shadow-lg hover:shadow-red-500/30 flex items-center justify-center gap-2"
+               >
+                 <Trash2 size={18} />
+                 {t('حذف البيانات واستعادة الموقع', 'Reset Data & Restore Site')}
+               </button>
             </div>
           </div>
         )}

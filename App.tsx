@@ -36,18 +36,26 @@ function App() {
   // Initial Server Connection Simulation
   useEffect(() => {
     const initApp = async () => {
-      await mockServer.connect();
-      const data = await mockServer.fetchAllData();
-      
-      setProducts(data.products);
-      setOrders(data.orders);
-      setReports(data.reports);
-      setCart(data.cart);
-      setBannerText(data.bannerText);
-      setPopupConfig(data.popupConfig);
-      setSiteConfig(data.siteConfig);
-      
-      setIsLoading(false);
+      try {
+        await mockServer.connect();
+        const data = await mockServer.fetchAllData();
+        
+        if (data.products && data.products.length > 0) {
+           setProducts(data.products);
+        }
+        
+        setOrders(data.orders || []);
+        setReports(data.reports || []);
+        setCart(data.cart || []);
+        setBannerText(data.bannerText || '');
+        setPopupConfig(data.popupConfig || { isActive: false, image: '' });
+        setSiteConfig(data.siteConfig || { enableTrackOrder: true });
+      } catch (error) {
+        console.error("Failed to load app data:", error);
+        // Fallback is already handled by initial state
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     initApp();
@@ -210,6 +218,13 @@ function App() {
     ));
     showNotification(t('تم تحديث حالة الطلب', 'Order status updated'));
   };
+  
+  // Handler for resetting data (passed to Admin)
+  const handleResetData = () => {
+     if (window.confirm(t('سيتم مسح جميع البيانات والعودة للوضع الافتراضي. هل أنت متأكد؟', 'All data will be reset to default. Are you sure?'))) {
+        mockServer.resetData();
+     }
+  };
 
   if (isLoading) {
     return <LoadingScreen language={language} />;
@@ -234,6 +249,7 @@ function App() {
             siteConfig={siteConfig}
             onUpdateSiteConfig={setSiteConfig}
             onUpdateOrderStatus={handleUpdateOrderStatus}
+            onResetData={handleResetData}
           />
         );
       case ViewState.CART:

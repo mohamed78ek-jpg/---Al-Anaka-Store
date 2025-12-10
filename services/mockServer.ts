@@ -11,7 +11,7 @@ const DB_KEYS = {
   CART: 'cart'
 };
 
-const LATENCY = 1500; // Simulated network delay in ms
+const LATENCY = 1000; // Reduced latency for better UX on mobile
 
 export const mockServer = {
   // Simulate initial connection
@@ -21,29 +21,54 @@ export const mockServer = {
     });
   },
 
-  // Generic fetch wrapper
+  // Generic fetch wrapper with Error Handling
   fetchAllData: async () => {
-    // We don't delay here again if called after connect, but for safety in this demo:
-    // Fetching Logic
-    const products = JSON.parse(localStorage.getItem(DB_KEYS.PRODUCTS) || JSON.stringify(PRODUCTS));
-    const orders = JSON.parse(localStorage.getItem(DB_KEYS.ORDERS) || '[]');
-    const reports = JSON.parse(localStorage.getItem(DB_KEYS.REPORTS) || '[]');
-    const cart = JSON.parse(localStorage.getItem(DB_KEYS.CART) || '[]');
-    
-    const bannerText = localStorage.getItem(DB_KEYS.BANNER) || 'أهلاً بكم في بازار لوك - خصومات تصل إلى 50% على التشكيلة الجديدة! 🌟 شحن مجاني للطلبات فوق 300 د.م';
-    
-    const popupConfig = JSON.parse(localStorage.getItem(DB_KEYS.POPUP) || JSON.stringify({ isActive: false, image: '' }));
-    const siteConfig = JSON.parse(localStorage.getItem(DB_KEYS.SITE) || JSON.stringify({ enableTrackOrder: true }));
+    try {
+      const getSafeJSON = (key: string, defaultValue: any) => {
+        const item = localStorage.getItem(key);
+        if (!item) return defaultValue;
+        try {
+          return JSON.parse(item);
+        } catch {
+          return defaultValue;
+        }
+      };
 
-    return {
-      products,
-      orders,
-      reports,
-      cart,
-      bannerText,
-      popupConfig,
-      siteConfig
-    };
+      const products = getSafeJSON(DB_KEYS.PRODUCTS, PRODUCTS);
+      // Determine if products is empty array (maybe user deleted all), if so, keep it empty. 
+      // If it's null/undefined logic handled above.
+      
+      const orders = getSafeJSON(DB_KEYS.ORDERS, []);
+      const reports = getSafeJSON(DB_KEYS.REPORTS, []);
+      const cart = getSafeJSON(DB_KEYS.CART, []);
+      
+      const bannerText = localStorage.getItem(DB_KEYS.BANNER) || 'أهلاً بكم في بازار لوك - خصومات تصل إلى 50% على التشكيلة الجديدة! 🌟 شحن مجاني للطلبات فوق 300 د.م';
+      
+      const popupConfig = getSafeJSON(DB_KEYS.POPUP, { isActive: false, image: '' });
+      const siteConfig = getSafeJSON(DB_KEYS.SITE, { enableTrackOrder: true });
+
+      return {
+        products,
+        orders,
+        reports,
+        cart,
+        bannerText,
+        popupConfig,
+        siteConfig
+      };
+    } catch (error) {
+      console.error("Mock Server Error:", error);
+      // Fallback to defaults in worst case
+      return {
+        products: PRODUCTS,
+        orders: [],
+        reports: [],
+        cart: [],
+        bannerText: '',
+        popupConfig: { isActive: false, image: '' },
+        siteConfig: { enableTrackOrder: true }
+      };
+    }
   },
 
   // Simulated Database Operations
@@ -54,4 +79,10 @@ export const mockServer = {
   saveBanner: (text: string) => localStorage.setItem(DB_KEYS.BANNER, text),
   savePopupConfig: (config: PopupConfig) => localStorage.setItem(DB_KEYS.POPUP, JSON.stringify(config)),
   saveSiteConfig: (config: SiteConfig) => localStorage.setItem(DB_KEYS.SITE, JSON.stringify(config)),
+  
+  // Utility to clear data
+  resetData: () => {
+    localStorage.clear();
+    window.location.reload();
+  }
 };
